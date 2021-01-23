@@ -9,7 +9,7 @@ RUN apk add --no-cache \
 # Make sure we use the virtualenv.
 ENV PATH="/opt/venv/bin:$PATH"
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
@@ -21,11 +21,9 @@ COPY --from=builder /opt/venv /opt/venv
 # Make sure we use the virtualenv.
 ENV PATH="/opt/venv/bin:$PATH"
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY . .
-
-VOLUME /usr/src/app
 
 EXPOSE 5004
 
