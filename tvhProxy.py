@@ -210,16 +210,11 @@ def _get_xmltv():
                     logger.error("duplicate channelNo: %s", channelNo)
 
                 channelsInEPG[channelNo] = False
-                channelName = ElementTree.Element('display-name')
-                channelName.text = str(channelNo) + " " + child[0].text
-                child.insert(0, channelName)
                 for icon in child.iter('icon'):
                     # check if icon exists (tvh always returns an URL even if there is no channel icon)
                     iconUrl = icon.attrib['src']
                     r = requests.head(iconUrl)
-                    if r.status_code == requests.codes.ok:
-                        icon.attrib['src'] = iconUrl
-                    else:
+                    if r.status_code != requests.codes.ok:
                         logger.error("remove icon: %s", iconUrl)
                         child.remove(icon)
 
@@ -233,13 +228,7 @@ def _get_xmltv():
                     child.attrib['start'], "%Y%m%d%H%M%S %z").astimezone(tz=None).replace(tzinfo=None)
                 stop_datetime = datetime.strptime(
                     child.attrib['stop'], "%Y%m%d%H%M%S %z").astimezone(tz=None).replace(tzinfo=None)
-                if start_datetime >= datetime.now() + timedelta(hours=72):
-                    # Plex doesn't like extremely large XML files, we'll remove the details from entries more than 72h in the future
-                    # Fixed w/ plex server 1.19.2.2673
-                    # for desc in child.iter('desc'):
-                    #    child.remove(desc)
-                    pass
-                elif stop_datetime > datetime.now() and start_datetime < datetime.now() + timedelta(hours=72):
+                if stop_datetime > datetime.now() and start_datetime < datetime.now() + timedelta(hours=72):
                     # add extra details for programs in the next 72hs
                     start_timestamp = int(
                         round(datetime.timestamp(start_datetime)))
