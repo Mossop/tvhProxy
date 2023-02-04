@@ -1,4 +1,4 @@
-FROM python:3.11-alpine as builder
+FROM python:3.11.1-alpine as builder
 
 # Dependencies are necessary for gevents, which seems to be rebuild on an alpine base image.
 RUN apk add --no-cache \
