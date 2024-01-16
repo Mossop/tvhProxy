@@ -31,7 +31,8 @@ config = {
     'deviceID': os.environ.get('DEVICE_ID') or '12345678',
     'bindAddr': os.environ.get('TVH_BINDADDR') or '',
     # only used if set (in case of forward-proxy)
-    'tvhURL': os.environ.get('TVH_URL') or 'http://localhost:9981',
+    'tvhHost': os.environ.get('TVH_HOST') or 'http://localhost:9981',
+    'tvhPort': os.environ.get('TVH_PORT') or '9981',
     'tvhProxyURL': os.environ.get('TVH_PROXY_URL'),
     'tvhProxyHost': os.environ.get('TVH_PROXY_HOST') or host_ip,
     'tvhProxyPort': os.environ.get('TVH_PROXY_PORT') or 5004,
@@ -45,6 +46,10 @@ config = {
     # specifiy a stream profile that you want to use for adhoc transcoding in tvh, e.g. mp4
     'streamProfile': os.environ.get('TVH_PROFILE') or 'pass'
 }
+
+config['tvhURL'] = 'http://%s:%s' % (config['tvhHost'], config['tvhPort'])
+config['streamUser'] = os.environ.get('TVH_STREAM_USER') or config['tvhUser']
+config['streamPassword'] = os.environ.get('TVH_STREAM_PASSWORD') or config['tvhPassword']
 
 discoverData = {
     'FriendlyName': 'tvhProxy',
@@ -81,8 +86,8 @@ def lineup():
 
     for c in _get_channels():
         if c['enabled']:
-            url = '%s/stream/channel/%s?profile=%s&weight=%s' % (
-                config['tvhURL'], c['uuid'], config['streamProfile'], int(config['tvhWeight']))
+            url = 'http://%s:%s@%s:%s/stream/channel/%s?profile=%s&weight=%s' % (
+                config['streamUser'], config['streamPassword'], config['tvhHost'], config['tvhPort'], c['uuid'], config['streamProfile'], int(config['tvhWeight']))
 
             lineup.append({'GuideNumber': str(c['number']),
                            'GuideName': c['name'],
